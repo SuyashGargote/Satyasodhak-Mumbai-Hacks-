@@ -40,7 +40,7 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -50,17 +50,30 @@ const Auth = () => {
 
         if (error) throw error;
 
-        toast({
-          title: "Check your email",
-          description: "We sent you a confirmation link to complete signup.",
-        });
+        // Check if email confirmation is required
+        if (data?.user && !data.session) {
+          toast({
+            title: "Check your email",
+            description: "We sent you a confirmation link to complete signup.",
+          });
+        } else if (data?.session) {
+          toast({
+            title: "Account created!",
+            description: "You can now start verifying facts.",
+          });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            throw new Error("Invalid email or password. Please try again.");
+          }
+          throw error;
+        }
 
         toast({
           title: "Welcome back!",
@@ -69,8 +82,8 @@ const Auth = () => {
       }
     } catch (error: any) {
       toast({
-        title: "Authentication error",
-        description: error.message,
+        title: isSignUp ? "Sign up failed" : "Sign in failed",
+        description: error.message || "An error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -88,13 +101,25 @@ const Auth = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if provider is not enabled
+        if (error.message.includes("provider") || error.message.includes("not enabled")) {
+          toast({
+            title: "Google Sign-In Not Configured",
+            description: "Please configure Google OAuth in Supabase Authentication settings or use email/password.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      }
     } catch (error: any) {
       toast({
         title: "Authentication error",
-        description: error.message,
+        description: error.message || "An error occurred during sign in",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
