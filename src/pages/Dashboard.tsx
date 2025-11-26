@@ -1,0 +1,205 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
+import { Sidebar } from "@/components/Sidebar";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { AnimatedScanner } from "@/components/AnimatedScanner";
+import { ResultCard } from "@/components/ResultCard";
+import { Search, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+export interface VerificationResult {
+  id: string;
+  verdict: "TRUE" | "FALSE" | "MISLEADING" | "PARTIALLY_TRUE" | "INCONCLUSIVE";
+  confidence: number;
+  explanation: string;
+  sources: Array<{
+    title: string;
+    snippet: string;
+    url: string;
+  }>;
+  claim: string;
+  timestamp: Date;
+}
+
+const Dashboard = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [claim, setClaim] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [results, setResults] = useState<VerificationResult[]>([]);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleVerify = async () => {
+    if (!claim.trim()) {
+      toast({
+        title: "Empty claim",
+        description: "Please enter a statement to verify.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsVerifying(true);
+
+    // Simulate API call with placeholder data
+    setTimeout(() => {
+      const mockResult: VerificationResult = {
+        id: Math.random().toString(36).substr(2, 9),
+        verdict: ["TRUE", "FALSE", "MISLEADING", "PARTIALLY_TRUE", "INCONCLUSIVE"][
+          Math.floor(Math.random() * 5)
+        ] as any,
+        confidence: Math.floor(Math.random() * 30) + 70,
+        explanation: `Based on cross-referencing multiple sources, this claim has been evaluated. The statement "${claim.substring(0, 50)}${claim.length > 50 ? "..." : ""}" was analyzed against global fact-checking databases and verified sources.`,
+        sources: [
+          {
+            title: "Reuters Fact Check Database",
+            snippet: "Verified information from trusted news sources indicates...",
+            url: "https://reuters.com",
+          },
+          {
+            title: "AP News Verification",
+            snippet: "According to multiple independent sources...",
+            url: "https://apnews.com",
+          },
+          {
+            title: "Google Fact Check Explorer",
+            snippet: "Cross-referenced data shows...",
+            url: "https://toolbox.google.com/factcheck",
+          },
+        ],
+        claim: claim,
+        timestamp: new Date(),
+      };
+
+      setResults((prev) => [mockResult, ...prev]);
+      setIsVerifying(false);
+      setClaim("");
+
+      toast({
+        title: "Verification complete",
+        description: "Your claim has been analyzed.",
+      });
+    }, 3000);
+  };
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className="flex min-h-screen w-full bg-background">
+      <Sidebar user={user} />
+
+      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-5xl mx-auto space-y-8"
+        >
+          {/* Header */}
+          <div className="space-y-2">
+            <h1 className="text-4xl font-extrabold tracking-wide flex items-center gap-3">
+              <Sparkles className="w-8 h-8 text-cyber-blue" />
+              Fact Verification Dashboard
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Paste any statement to verify its authenticity against global sources
+            </p>
+          </div>
+
+          {/* Input Section */}
+          <Card className="shadow-card border-border/50">
+            <div className="p-6 space-y-4">
+              <Textarea
+                placeholder="Paste any statement to check if it's true..."
+                value={claim}
+                onChange={(e) => setClaim(e.target.value)}
+                className="min-h-[150px] text-lg resize-none bg-background/50 focus:bg-background transition-colors"
+                disabled={isVerifying}
+              />
+
+              <Button
+                onClick={handleVerify}
+                disabled={isVerifying || !claim.trim()}
+                size="lg"
+                className="w-full bg-cyber-blue hover:bg-cyber-blue/90 text-primary shadow-glow transition-all duration-300 hover:scale-[1.02]"
+              >
+                <Search className="mr-2 w-5 h-5" />
+                {isVerifying ? "Verifying..." : "Verify Claim"}
+              </Button>
+            </div>
+          </Card>
+
+          {/* Animated Scanner */}
+          <AnimatePresence>
+            {isVerifying && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <AnimatedScanner />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Results Section */}
+          <AnimatePresence mode="popLayout">
+            {results.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-6"
+              >
+                <h2 className="text-2xl font-bold tracking-wide">Verification Results</h2>
+                <div className="space-y-4">
+                  {results.map((result, index) => (
+                    <motion.div
+                      key={result.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <ResultCard result={result} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </main>
+    </div>
+  );
+};
+
+// Simple Card component for the input section
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-card rounded-xl border ${className}`}>{children}</div>
+);
+
+export default Dashboard;
