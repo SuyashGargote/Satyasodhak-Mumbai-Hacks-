@@ -133,24 +133,34 @@ const Dashboard = () => {
 
           {/* Input Section */}
           <Card className="shadow-card border-border/50">
-            <div className="p-6 space-y-4">
-              <Textarea
-                placeholder="Paste any statement to check if it's true..."
-                value={claim}
-                onChange={(e) => setClaim(e.target.value)}
-                className="min-h-[150px] text-lg resize-none bg-background/50 focus:bg-background transition-colors"
-                disabled={isVerifying}
-              />
+            <div className="p-8 space-y-4">
+              <div className="relative">
+                <Textarea
+                  placeholder='Example: "COVID-19 vaccines cause infertility" — Verify'
+                  value={claim}
+                  onChange={(e) => setClaim(e.target.value)}
+                  className="min-h-[160px] text-lg resize-none bg-background/50 focus:bg-background focus:ring-2 focus:ring-cyber-blue/50 focus:shadow-glow transition-all duration-300 border-border/50"
+                  disabled={isVerifying}
+                />
+              </div>
 
-              <Button
-                onClick={handleVerify}
-                disabled={isVerifying || !claim.trim()}
-                size="lg"
-                className="w-full bg-cyber-blue hover:bg-cyber-blue/90 text-primary shadow-glow transition-all duration-300 hover:scale-[1.02]"
-              >
-                <Search className="mr-2 w-5 h-5" />
-                {isVerifying ? "Verifying..." : "Verify Claim"}
-              </Button>
+              <div className="space-y-3">
+                <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                  <Button
+                    onClick={handleVerify}
+                    disabled={isVerifying || !claim.trim()}
+                    size="lg"
+                    className="w-full bg-cyber-blue hover:bg-cyber-blue/90 text-primary shadow-glow transition-all duration-300 rounded-xl font-semibold text-lg py-6"
+                  >
+                    <Search className="mr-2 w-5 h-5" />
+                    {isVerifying ? "Verifying..." : "Verify Claim"}
+                  </Button>
+                </motion.div>
+                
+                <p className="text-xs text-center text-muted-foreground italic">
+                  🔒 Your data is never stored until you choose to save it.
+                </p>
+              </div>
             </div>
           </Card>
 

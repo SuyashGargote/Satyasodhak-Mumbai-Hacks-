@@ -59,14 +59,30 @@ export const ResultCard = ({ result }: ResultCardProps) => {
     });
   };
 
+  // Gradient backgrounds based on verdict
+  const getCardGradient = () => {
+    switch (result.verdict) {
+      case "TRUE":
+        return "bg-gradient-to-br from-truth-green/5 to-transparent";
+      case "FALSE":
+        return "bg-gradient-to-br from-truth-red/5 to-transparent";
+      case "MISLEADING":
+        return "bg-gradient-to-br from-truth-amber/5 to-transparent";
+      case "PARTIALLY_TRUE":
+        return "bg-gradient-to-br from-cyber-blue/5 to-transparent";
+      default:
+        return "bg-gradient-to-br from-truth-gray/5 to-transparent";
+    }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.3 }}
+      whileHover={{ scale: 1.01, y: -4 }}
+      transition={{ duration: 0.4, type: "spring", stiffness: 200 }}
     >
-      <Card className="shadow-card border-border/50 overflow-hidden">
+      <Card className={`shadow-card border-border/50 overflow-hidden rounded-2xl ${getCardGradient()}`}>
         <CardHeader className="space-y-4 pb-4">
           {/* Verdict and Confidence */}
           <div className="flex items-start justify-between gap-4">
