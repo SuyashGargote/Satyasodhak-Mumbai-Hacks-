@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { 
   ThumbsUp, 
   BookmarkPlus, 
+  Bookmark,
   Share2, 
   RefreshCw, 
   ChevronDown, 
@@ -15,15 +16,19 @@ import {
   ExternalLink 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ResultCardProps {
   result: VerificationResult;
+  savedResultId?: string;
+  onSaveToggle?: () => void;
 }
 
-export const ResultCard = ({ result }: ResultCardProps) => {
+export const ResultCard = ({ result, savedResultId, onSaveToggle }: ResultCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUseful, setIsUseful] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(!!savedResultId);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   const handleUseful = () => {
@@ -34,12 +39,82 @@ export const ResultCard = ({ result }: ResultCardProps) => {
     });
   };
 
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-    toast({
-      title: isSaved ? "Removed from saved" : "Result saved",
-      description: isSaved ? "" : "You can find this in your Saved Results.",
-    });
+  const handleSave = async () => {
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to save results.",
+          variant: "destructive",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      if (isSaved && savedResultId) {
+        // Unsave: update is_saved to false
+        const { error } = await supabase
+          .from("verification_results")
+          .update({ is_saved: false })
+          .eq("id", savedResultId);
+
+        if (error) throw error;
+
+        setIsSaved(false);
+        toast({
+          title: "Removed from saved",
+          description: "This result is no longer saved.",
+        });
+        onSaveToggle?.();
+      } else {
+        // Save: either update existing or create new
+        if (savedResultId) {
+          const { error } = await supabase
+            .from("verification_results")
+            .update({ is_saved: true })
+            .eq("id", savedResultId);
+
+          if (error) throw error;
+        } else {
+          // Create new saved result
+          const { error } = await supabase
+            .from("verification_results")
+            .insert({
+              user_id: user.id,
+              claim: result.claim,
+              verdict: result.verdict,
+              confidence: result.confidence,
+              explanation: result.explanation,
+              sources: result.sources,
+              is_saved: true,
+            });
+
+          if (error) throw error;
+        }
+
+        setIsSaved(true);
+        toast({
+          title: "Result saved",
+          description: "You can find this in your Saved Results.",
+        });
+        onSaveToggle?.();
+      }
+    } catch (error: any) {
+      console.error("Save error:", error);
+      toast({
+        title: "Failed to save",
+        description: error.message || "An error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleShare = () => {
@@ -176,10 +251,20 @@ export const ResultCard = ({ result }: ResultCardProps) => {
               variant="outline"
               size="sm"
               onClick={handleSave}
+              disabled={isSaving}
               className={isSaved ? "bg-cyber-blue/10 text-cyber-blue border-cyber-blue/30" : ""}
             >
-              <BookmarkPlus className="w-4 h-4 mr-2" />
-              {isSaved ? "Saved" : "Save Result"}
+              {isSaved ? (
+                <>
+                  <Bookmark className="w-4 h-4 mr-2 fill-current" />
+                  Saved
+                </>
+              ) : (
+                <>
+                  <BookmarkPlus className="w-4 h-4 mr-2" />
+                  {isSaving ? "Saving..." : "Save Result"}
+                </>
+              )}
             </Button>
 
             <Button variant="outline" size="sm" onClick={handleShare}>

@@ -65,45 +65,52 @@ const Dashboard = () => {
 
     setIsVerifying(true);
 
-    // Simulate API call with placeholder data
-    setTimeout(() => {
-      const mockResult: VerificationResult = {
-        id: Math.random().toString(36).substr(2, 9),
-        verdict: ["TRUE", "FALSE", "MISLEADING", "PARTIALLY_TRUE", "INCONCLUSIVE"][
-          Math.floor(Math.random() * 5)
-        ] as any,
-        confidence: Math.floor(Math.random() * 30) + 70,
-        explanation: `Based on cross-referencing multiple sources, this claim has been evaluated. The statement "${claim.substring(0, 50)}${claim.length > 50 ? "..." : ""}" was analyzed against global fact-checking databases and verified sources.`,
-        sources: [
-          {
-            title: "Reuters Fact Check Database",
-            snippet: "Verified information from trusted news sources indicates...",
-            url: "https://reuters.com",
-          },
-          {
-            title: "AP News Verification",
-            snippet: "According to multiple independent sources...",
-            url: "https://apnews.com",
-          },
-          {
-            title: "Google Fact Check Explorer",
-            snippet: "Cross-referenced data shows...",
-            url: "https://toolbox.google.com/factcheck",
-          },
-        ],
-        claim: claim,
-        timestamp: new Date(),
-      };
-
-      setResults((prev) => [mockResult, ...prev]);
-      setIsVerifying(false);
-      setClaim("");
-
-      toast({
-        title: "Verification complete",
-        description: "Your claim has been analyzed.",
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-claim", {
+        body: { claim: claim.trim() },
       });
-    }, 3000);
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Verification failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        setIsVerifying(false);
+        return;
+      }
+
+      if (data?.result) {
+        const newResult: VerificationResult = {
+          id: Math.random().toString(36).substr(2, 9),
+          verdict: data.result.verdict,
+          confidence: data.result.confidence,
+          explanation: data.result.explanation,
+          sources: data.result.sources,
+          claim: data.result.claim,
+          timestamp: new Date(),
+        };
+
+        setResults((prev) => [newResult, ...prev]);
+        setClaim("");
+
+        toast({
+          title: "Verification complete",
+          description: "Your claim has been analyzed using AI.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Verification error:", error);
+      toast({
+        title: "Verification failed",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   if (!user) {

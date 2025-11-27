@@ -41,6 +41,51 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_results: {
+        Row: {
+          claim: string
+          confidence: number
+          created_at: string | null
+          explanation: string
+          id: string
+          is_saved: boolean | null
+          notes: string | null
+          sources: Json
+          tags: string[] | null
+          updated_at: string | null
+          user_id: string
+          verdict: string
+        }
+        Insert: {
+          claim: string
+          confidence: number
+          created_at?: string | null
+          explanation: string
+          id?: string
+          is_saved?: boolean | null
+          notes?: string | null
+          sources?: Json
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id: string
+          verdict: string
+        }
+        Update: {
+          claim?: string
+          confidence?: number
+          created_at?: string | null
+          explanation?: string
+          id?: string
+          is_saved?: boolean | null
+          notes?: string | null
+          sources?: Json
+          tags?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+          verdict?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

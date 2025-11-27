@@ -4,16 +4,20 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Sidebar } from "@/components/Sidebar";
+import { ResultCard } from "@/components/ResultCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { VerdictBadge } from "@/components/VerdictBadge";
-import { Search, RefreshCw, List, LayoutGrid } from "lucide-react";
+import { Search, Loader2, List, LayoutGrid } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const History = () => {
   const [user, setUser] = useState<User | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "card">("card");
+  const [history, setHistory] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,39 +39,36 @@ const History = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Mock history data
-  const historyItems = [
-    {
-      id: "1",
-      claim: "The Earth is flat and NASA photos are fake",
-      verdict: "FALSE" as const,
-      date: new Date(Date.now() - 86400000),
-      confidence: 98,
-    },
-    {
-      id: "2",
-      claim: "Drinking water helps maintain healthy body temperature",
-      verdict: "TRUE" as const,
-      date: new Date(Date.now() - 172800000),
-      confidence: 95,
-    },
-    {
-      id: "3",
-      claim: "5G towers cause coronavirus",
-      verdict: "FALSE" as const,
-      date: new Date(Date.now() - 259200000),
-      confidence: 99,
-    },
-    {
-      id: "4",
-      claim: "Coffee can improve athletic performance",
-      verdict: "PARTIALLY_TRUE" as const,
-      date: new Date(Date.now() - 345600000),
-      confidence: 78,
-    },
-  ];
+  useEffect(() => {
+    if (user) {
+      fetchHistory();
+    }
+  }, [user]);
 
-  const filteredItems = historyItems.filter((item) =>
+  const fetchHistory = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("verification_results")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setHistory(data || []);
+    } catch (error: any) {
+      console.error("Failed to fetch history:", error);
+      toast({
+        title: "Failed to load history",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredItems = history.filter((item) =>
     item.claim.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -124,34 +125,40 @@ const History = () => {
           </div>
 
           {/* Results */}
-          {viewMode === "card" ? (
-            <div className="grid gap-4 md:grid-cols-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-cyber-blue" />
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="text-center py-12 bg-card rounded-xl border border-border/50 shadow-card">
+              <p className="text-muted-foreground">
+                {searchQuery
+                  ? "No results found matching your search."
+                  : "Your verification history will appear here. Start by verifying a claim on the dashboard."}
+              </p>
+            </div>
+          ) : viewMode === "card" ? (
+            <div className="space-y-4">
               {filteredItems.map((item, index) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-card rounded-xl border border-border/50 shadow-card p-6 space-y-4 hover:shadow-glow transition-shadow"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <VerdictBadge verdict={item.verdict} />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                      {item.date.toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <p className="text-sm leading-relaxed line-clamp-3">{item.claim}</p>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                    <span className="text-sm text-muted-foreground">
-                      {item.confidence}% confidence
-                    </span>
-                    <Button variant="outline" size="sm">
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Re-Run
-                    </Button>
-                  </div>
+                  <ResultCard
+                    result={{
+                      id: item.id,
+                      claim: item.claim,
+                      verdict: item.verdict,
+                      confidence: item.confidence,
+                      explanation: item.explanation,
+                      sources: item.sources,
+                      timestamp: new Date(item.created_at),
+                    }}
+                    savedResultId={item.id}
+                    onSaveToggle={fetchHistory}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -165,7 +172,6 @@ const History = () => {
                       <th className="px-6 py-4 text-left text-sm font-semibold">Verdict</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Date</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold">Confidence</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -181,28 +187,17 @@ const History = () => {
                           <p className="text-sm truncate">{item.claim}</p>
                         </td>
                         <td className="px-6 py-4">
-                          <VerdictBadge verdict={item.verdict} />
+                          <span className="text-sm font-semibold">{item.verdict}</span>
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground whitespace-nowrap">
-                          {item.date.toLocaleDateString()}
+                          {new Date(item.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 text-sm">{item.confidence}%</td>
-                        <td className="px-6 py-4">
-                          <Button variant="ghost" size="sm">
-                            <RefreshCw className="w-4 h-4" />
-                          </Button>
-                        </td>
                       </motion.tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
-
-          {filteredItems.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No results found matching your search.</p>
             </div>
           )}
         </motion.div>
