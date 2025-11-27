@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Loader2, Search, Shield, Globe } from "lucide-react";
+import { Search, Shield, Globe } from "lucide-react";
+import { CyclingText } from "./CyclingText";
 
 export const AnimatedScanner = () => {
   return (
@@ -65,15 +66,9 @@ export const AnimatedScanner = () => {
           </motion.div>
         </div>
 
-        {/* Text */}
+        {/* Cycling Text */}
         <div className="text-center space-y-3">
-          <motion.h3
-            className="text-xl font-bold tracking-wide"
-            animate={{ opacity: [1, 0.6, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            Analyzing global sources and verifying truth…
-          </motion.h3>
+          <CyclingText />
           <p className="text-sm text-muted-foreground">
             Cross-referencing fact-checking databases
           </p>
