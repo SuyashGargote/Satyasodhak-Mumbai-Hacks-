@@ -9,7 +9,6 @@ import {
   LayoutDashboard, 
   History, 
   BookmarkPlus, 
-  Settings, 
   LogOut,
   Shield
 } from "lucide-react";
@@ -40,7 +39,6 @@ export const Sidebar = ({ user }: SidebarProps) => {
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/history", icon: History, label: "History" },
     { to: "/saved", icon: BookmarkPlus, label: "Saved Results" },
-    { to: "/settings", icon: Settings, label: "Settings" },
   ];
 
   return (
