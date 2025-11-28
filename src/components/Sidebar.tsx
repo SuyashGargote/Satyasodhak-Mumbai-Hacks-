@@ -10,9 +10,12 @@ import {
   History, 
   BookmarkPlus, 
   LogOut,
-  Shield
+  Shield,
+  Sun,
+  Moon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "next-themes";
 
 interface SidebarProps {
   user: User;
@@ -21,6 +24,7 @@ interface SidebarProps {
 export const Sidebar = ({ user }: SidebarProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -105,6 +109,39 @@ export const Sidebar = ({ user }: SidebarProps) => {
           </motion.div>
         ))}
       </nav>
+
+      {/* Theme Toggle */}
+      <div className="p-4 border-t border-border/50">
+        <motion.div 
+          whileHover={{ scale: 1.02 }} 
+          whileTap={{ scale: 0.98 }}
+          className="flex items-center justify-between px-4 py-2 rounded-xl bg-muted/30"
+        >
+          <div className="flex items-center gap-3">
+            {theme === 'dark' ? (
+              <Moon className="w-5 h-5" />
+            ) : (
+              <Sun className="w-5 h-5" />
+            )}
+            <span className="text-sm font-medium">
+              {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 rounded-full"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            <span className="sr-only">Toggle theme</span>
+            {theme === 'dark' ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
+        </motion.div>
+      </div>
 
       {/* Logout Button */}
       <div className="p-4 border-t border-border/50">
