@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Sidebar } from "@/components/Sidebar";
+import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AnimatedScanner } from "@/components/AnimatedScanner";
@@ -118,10 +118,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <Sidebar user={user} />
+    <div className="min-h-screen w-full bg-background">
+      <Navbar user={user} />
 
-      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+      <main className="p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
