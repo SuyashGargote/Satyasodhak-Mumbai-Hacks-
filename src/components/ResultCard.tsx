@@ -13,18 +13,20 @@ import {
   RefreshCw, 
   ChevronDown, 
   ChevronUp,
-  ExternalLink 
+  ExternalLink,
+  Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ResultCardProps {
+  onDelete?: () => void;
   result: VerificationResult;
   savedResultId?: string;
   onSaveToggle?: () => void;
 }
 
-export const ResultCard = ({ result, savedResultId, onSaveToggle }: ResultCardProps) => {
+export const ResultCard = ({ result, savedResultId, onSaveToggle, onDelete }: ResultCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isUseful, setIsUseful] = useState(false);
   const [isSaved, setIsSaved] = useState(!!savedResultId);
@@ -276,6 +278,16 @@ export const ResultCard = ({ result, savedResultId, onSaveToggle }: ResultCardPr
               <RefreshCw className="w-4 h-4 mr-2" />
               Re-Verify
             </Button>
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                onClick={onDelete}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

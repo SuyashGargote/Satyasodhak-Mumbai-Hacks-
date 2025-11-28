@@ -1,53 +1,92 @@
-# Welcome to your Lovable project
+# Truth Seeker AI
 
-## Project info
+A powerful web application designed to help users verify the authenticity of information and detect misinformation using advanced AI technology.
 
-**URL**: https://lovable.dev/projects/2e35ebd9-d04c-47df-978e-740d09f612a4
+## 🌟 Features
 
-## How can I edit this code?
+- **AI-Powered Verification**: Utilizes state-of-the-art AI models to analyze and verify information
+- **Dark/Light Mode**: Beautiful, accessible UI with system preference detection
+- **User Authentication**: Secure login and user management
+- **History & Saved Items**: Track your verification history and save important results
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-There are several ways of editing your application.
+## 🚀 Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2e35ebd9-d04c-47df-978e-740d09f612a4) and start prompting.
+- Node.js (v16 or higher)
+- npm (v8 or higher) or yarn
+- Git
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/SuyashGargote/Satyasodhak-Mumbai-Hacks-.git
+   cd Satyasodhak-Mumbai-Hacks-
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. **Set up environment variables**
+   Create a `.env` file in the root directory and add the following:
+   ```
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-Follow these steps:
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+5. **Open in browser**
+   Visit `http://localhost:8080` in your browser
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠️ Built With
 
-# Step 3: Install the necessary dependencies.
-npm i
+- [React](https://reactjs.org/) - Frontend library
+- [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [Vite](https://vitejs.dev/) - Fast development server and build tool
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Shadcn UI](https://ui.shadcn.com/) - Beautifully designed components
+- [Supabase](https://supabase.com/) - Backend as a Service (BaaS)
+- [Framer Motion](https://www.framer.com/motion/) - Animation library
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## 📂 Project Structure
+
+```
+src/
+├── components/     # Reusable UI components
+├── pages/         # Application pages
+├── hooks/         # Custom React hooks
+├── lib/           # Utility functions and configurations
+├── styles/        # Global styles and theme
+└── App.tsx        # Main application component
 ```
 
-**Edit a file directly in GitHub**
+## 🤝 Contributing
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-**Use GitHub Codespaces**
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 👏 Acknowledgements
+
+- [Next.js Documentation](https://nextjs.org/docs) - For the amazing documentation
+- [Tailwind CSS](https://tailwindcss.com/docs) - For the utility-first CSS framework
+- [Shadcn UI](https://ui.shadcn.com/) - For the beautiful components
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
