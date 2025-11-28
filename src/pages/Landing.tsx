@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Search, ShieldCheck, Zap, CheckCircle, Clock, BarChart2, ArrowRight, Sparkles } from "lucide-react";
+import { Search, ShieldCheck, Zap, CheckCircle, Clock, BarChart2, ArrowRight, Sparkles, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 
 const FeatureCard = ({ icon: Icon, title, description, delay }: { icon: React.ComponentType<{ className?: string }>; title: string; description: string; delay: number }) => (
   <motion.div
@@ -20,6 +21,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay }: { icon: React.Co
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -31,20 +33,34 @@ const Landing = () => {
             SatyaShodhak
           </span>
         </div>
-        <div className="hidden md:flex items-center space-x-6">
-          <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">
-            Features
-          </a>
-          <a href="#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">
-            How It Works
-          </a>
-          <Button variant="ghost" onClick={() => navigate("/auth")}>
-            Sign In
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </Button>
-          <Button onClick={() => navigate("/auth")} className="space-x-2">
-            <span>Get Started</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          <div className="hidden md:flex items-center space-x-6">
+            <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">
+              Features
+            </a>
+            <a href="#how-it-works" className="text-sm font-medium hover:text-primary transition-colors">
+              How It Works
+            </a>
+            <Button variant="ghost" onClick={() => navigate("/auth")}>
+              Sign In
+            </Button>
+            <Button onClick={() => navigate("/auth")} className="space-x-2">
+              <span>Get Started</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </nav>
 
